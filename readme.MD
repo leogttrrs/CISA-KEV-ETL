@@ -1,38 +1,68 @@
-# CISA KEV ETL Pipeline
+# Cyber Threat Intelligence Data ETL Pipelines
 
-An end-to-end Data Pipeline (ETL) developed in Python to extract, transform, and store data regarding actively exploited cybersecurity vulnerabilities worldwide.
+An end-to-end modular Data Engineering platform (ETL) developed in Python. This project extracts, transforms, and stores real-time cybersecurity intelligence data regarding actively exploited vulnerabilities and live malware distribution.
 
 ## About the Project
-This project was built to practice Data Engineering skills. The pipeline consumes real-time data from the official Known Exploited Vulnerabilities (KEV) catalog provided by the U.S. Cybersecurity and Infrastructure Security Agency (CISA).
 
-## Architecture (Data Flow)
-1. **Extract:** HTTP request (via `requests` library) to CISA's public API, extracting the complete catalog of CVEs in JSON format.
-2. **Transform:** Unstructured data processing using `pandas`. Transformations include:
-   - Filtering and selecting relevant analytical columns (CVE ID, Vendor/Project, Description).
-   - Data type conversion and standardization (`datetime` parsing).
-   - Handling null/missing values to ensure data integrity.
-3. **Load:** Loading the cleaned *DataFrame* into a **PostgreSQL** cloud database (Neon), automatically generating the table schema for analytical SQL queries.
+This project was built to practice Data Engineering skills and Data Platform architecture. What started as a single ETL script has evolved into a unified pipeline processing two distinct critical security feeds:
+
+1. **CISA KEV Catalog** — Tracks worldwide known exploited vulnerabilities.
+2. **Abuse.ch URLhaus** — Tracks live, actively distributing malware and botnets.
+
+## Architecture & Data Flow
+
+The architecture follows a modular ETL approach, allowing jobs to run independently or orchestrated centrally.
+
+- **Extract:** HTTP requests (via `requests`) to public and authenticated REST APIs, passing auth keys via headers.
+- **Transform:** Unstructured JSON processed with `pandas`, including:
+  - Filtering analytical columns and handling null/missing values
+  - Data type conversion and standardization (`datetime` parsing)
+  - **Business Logic & Feature Engineering:** Boolean masks to drop offline threats; lambda functions to classify active threats by severity (`CRITICAL` vs `HIGH`)
+- **Load:** Cleaned DataFrames pushed into a **PostgreSQL** cloud database (Neon), with automatic schema generation and updates for analytical SQL queries.
 
 ## Tech Stack
-* **Language:** Python 3
-* **Data Manipulation:** Pandas
-* **Database:** PostgreSQL (Neon) & SQLAlchemy
-* **REST Requests:** Requests
-* **Environment Management:** python-dotenv
+
+| Layer | Tool |
+|---|---|
+| Language | Python 3 |
+| Data Manipulation | Pandas |
+| Database | PostgreSQL (Neon) + SQLAlchemy |
+| HTTP Requests | Requests |
+| Environment | python-dotenv |
 
 ## How to Run
-Clone the repository and install the dependencies:
+
+### 1. Clone and install dependencies
 
 ```bash
-git clone https://github.com/leogttrrs/CISA-KEV-ETL.git
-cd cisa-kev-etl
+git clone https://github.com/leogttrrs/cyber-threat-intel-pipelines.git
+cd cyber-threat-intel-pipelines
 pip install -r requirements.txt
 ```
-Copy the `.env.example` file and rename it to `.env`
 
-Run the pipeline:
-```bash
-python etl_pipeline.py
+### 2. Configure environment variables
+
+Copy `.env.example`, rename it to `.env`, and fill in your credentials:
+
+```env
+DATABASE_URL=postgresql://user:password@host...
+URLHAUS_API_KEY=your_abuse_ch_api_key_here
 ```
 
-The results will appear in the table named "active_vulnerabilities" on your NeonDB PostgreSQL.
+### 3. Run the pipelines
+
+**Option A — Orchestrated (recommended):** runs all ETL jobs sequentially.
+
+```bash
+python main.py
+```
+
+**Option B — Individual pipelines:** useful for debugging or isolated updates.
+
+```bash
+python ETLs/vulnerabilities_etl.py
+# or
+python ETLs/malware_etl.py
+```
+
+Results will automatically populate the `active_vulnerabilities` and `active_malwares` tables in your NeonDB PostgreSQL database.

@@ -1,3 +1,5 @@
 .idea/
 .venv/
 .env
+ETLs/__pycache__/
+__pycache__

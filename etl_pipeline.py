@@ -1,8 +1,15 @@
+import requests
 import logging
 import os
 from dotenv import load_dotenv
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+
+def extract_data(url: str) -> dict:
+    logging.info("Starting data extraction (Extract)...")
+    response = requests.get(url)
+    response.raise_for_status()
+    return response.json()
 
 
 if __name__ == "__main__":

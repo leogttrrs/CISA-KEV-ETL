@@ -1,4 +1,4 @@
-# CISA KEV ETL Pipeline 🛡️
+# CISA KEV ETL Pipeline
 
 An end-to-end Data Pipeline (ETL) developed in Python to extract, transform, and store data regarding actively exploited cybersecurity vulnerabilities worldwide.
 

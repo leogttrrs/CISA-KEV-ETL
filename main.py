@@ -13,4 +13,4 @@ if __name__ == "__main__":
     logging.info("--- Checking URLhaus Malware Tracker ---")
     run_malware_pipeline()
 
-    logging.info("Pipelines executed successfully")
+    logging.info("Pipelines executed. Check each individual pipeline logs!")
